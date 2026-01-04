@@ -73,10 +73,10 @@ function App() {
 
   return (
     // Background: Pure black, clean sans-serif text
-    <div className="min-h-screen bg-black text-white font-sans flex items-center justify-center sm:p-6">
+    <div className="min-h-screen bg-black text-white font-sans flex items-center justify-center p-2 sm:p-6">
       
       {/* Container: Simple border, minimal shadow, softer dark background */}
-      <div className="w-full max-w-md h-[600px] bg-zinc-950 border border-zinc-800 sm:rounded-2xl flex flex-col shadow-2xl overflow-hidden relative">
+      <div className="w-full max-w-md h-[600px] bg-zinc-950 border border-zinc-800 rounded-xl flex flex-col shadow-2xl overflow-hidden relative">
         
         {/* Header: Minimalist with status dot */}
         <div className="h-14 border-b border-zinc-800 flex items-center justify-between px-6 bg-zinc-950/50 backdrop-blur-sm z-10">
