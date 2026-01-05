@@ -61,6 +61,26 @@ function App() {
     setJoined(true);
   };
 
+  const createAndJoin = () => {
+    if (!username) return alert("Please enter a username first");
+    if (status !== "connected") return;
+
+    // Generate random 6-character room ID
+    const newRoomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+    
+    setRoom(newRoomId);
+    setMessages([]); // Clear previous
+    
+    // Send join request immediately with the new ID
+    socketRef.current?.send(JSON.stringify({ 
+      type: "join", 
+      room: newRoomId, 
+      user: username 
+    }));
+    
+    setJoined(true);
+  };
+
   const sendMessage = () => {
     if (!message.trim() || !socketRef.current) return;
     socketRef.current.send(JSON.stringify({ type: "message", room, user: username, message }));
@@ -74,7 +94,9 @@ function App() {
   return (
     // Background: Pure black, clean sans-serif text
     <div className="min-h-screen bg-black text-white font-sans flex items-center justify-center p-2 sm:p-6">
-      
+       <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[400px] bg-slate-600/20 rounded-full blur-[120px] pointer-events-none mix-blend-screen" />
+      <div className="absolute bottom-[10%] right-[-10%] w-[500px] h-[400px] bg-slate-600/10 rounded-full blur-[120px] pointer-events-none mix-blend-screen" />
+
       {/* Container: Simple border, minimal shadow, softer dark background */}
       <div className="w-full max-w-md h-[600px] bg-zinc-950 border border-zinc-800 rounded-xl flex flex-col shadow-2xl overflow-hidden relative">
         
@@ -105,41 +127,58 @@ function App() {
         {/* Content Area */}
         <div className="flex-1 overflow-hidden relative">
           
-          {!joined ? (
-            /* Join View: Clean centered inputs */
-            <div className="h-full flex flex-col justify-center px-8 space-y-6">
-              <div className="text-center space-y-1 mb-4">
+        {!joined ? (
+            /* Join View */
+            <div className="h-full flex flex-col justify-center px-8">
+              <div className="text-center space-y-1 mb-8">
                 <h2 className="text-2xl font-semibold text-white">Welcome</h2>
                 <p className="text-sm text-zinc-500">Enter your details to connect.</p>
               </div>
 
               <div className="space-y-4">
-                <div>
-                  <input
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-sm focus:border-white focus:outline-none transition-colors placeholder-zinc-600 text-white"
-                    placeholder="Username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <input
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-sm focus:border-white focus:outline-none transition-colors placeholder-zinc-600 text-white"
-                    placeholder="Room Name"
-                    value={room}
-                    onChange={(e) => setRoom(e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(e, joinRoom)}
-                  />
-                </div>
-              </div>
+                <input
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-sm focus:border-white focus:outline-none transition-colors placeholder-zinc-600 text-white"
+                  placeholder="Username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+                <input
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-sm focus:border-white focus:outline-none transition-colors placeholder-zinc-600 text-white"
+                  placeholder="Room Name (to join existing)"
+                  value={room}
+                  onChange={(e) => setRoom(e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(e, joinRoom)}
+                />
+                
+                <button
+                  onClick={joinRoom}
+                  disabled={status !== "connected" || !room}
+                  className="w-full bg-white text-black font-medium py-3 rounded-lg hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
+                >
+                  Join Room
+                </button>
 
-              <button
-                onClick={joinRoom}
-                disabled={status !== "connected"}
-                className="w-full bg-white text-black font-medium py-3 rounded-lg hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
-              >
-                Start Chatting
-              </button>
+                {/* --- New Create Room Section --- */}
+                <div className="relative py-2">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-zinc-800"></div>
+                  </div>
+                  <div className="relative flex justify-center text-xs">
+                    <span className="bg-zinc-950 px-2 text-zinc-500">or</span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={createAndJoin}
+                  disabled={status !== "connected" || !username}
+                  className="w-full bg-zinc-900 border border-zinc-800 text-zinc-300 font-medium py-3 rounded-lg hover:bg-zinc-800 hover:text-white hover:border-zinc-700 disabled:opacity-50 transition-all active:scale-95 flex items-center justify-center gap-2"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                  </svg>
+                  Create New Room
+                </button>
+              </div>
             </div>
           ) : (
             /* Chat View */
